@@ -1,62 +1,40 @@
-# 🧠 Mental Health Prediction System
+🚀 Project Roadmap
 
-## 📌 Project Overview
+📊 Data Collection & Understanding  
+→ Collect Arabic & English mental health datasets  
+→ Explore data distribution and define target labels (stress, anxiety, depression)
 
-This project builds a **Machine Learning system** that predicts mental health conditions based on questionnaire answers.
+🧹 Data Preprocessing  
+→ Clean and normalize text (Arabic + English)  
+→ Tokenization for XLM-R transformer model  
+→ Feature engineering for survey-based ML model  
+→ Handle missing values and class imbalance
 
-The system predicts:
+🧠 Model Development  
+→ Train multilingual NLP model (XLM-R) for text analysis  
+→ Train classical ML model (e.g., Logistic Regression / Random Forest) for survey data  
+→ Evaluate models using Accuracy, F1-score, and Confusion Matrix
 
-- Depression Level
-- Anxiety Level
-- Stress Level
+🔗 Fusion Layer  
+→ Combine outputs from NLP and survey model  
+→ Apply weighted or rule-based decision system  
+→ Generate final mental health prediction
 
-The model takes questionnaire answers as input and outputs:
+⚙️ Backend Development (Future Scope)  
+→ Build REST API using Flask / FastAPI  
+→ Serve models for real-time inference  
+→ Optional integration with Hugging Face model hosting
 
-- Percentage of Depression
-- Percentage of Anxiety
-- Percentage of Stress
+💻 Frontend Development  
+→ Build interactive demo using Streamlit  
+→ Future migration to Flutter mobile application
 
----
+☁️ Deployment  
+→ Deploy Streamlit demo for presentation  
+→ Deploy backend API on cloud platforms (Hugging Face / Render / etc.)
 
-# 🗺️ Project Roadmap
-
-## Phase 1 — Problem Definition
-
-### Goal
-
-Build a Machine Learning model that predicts mental health conditions from questionnaire answers.
-
-The system should:
-
-- Accept user answers
-- Predict mental health scores
-- Show percentages
-- Classify severity levels
-
-Predicted Conditions:
-
-- Depression
-- Anxiety
-- Stress
-
----
-
-## Phase 2 — Dataset
-
-### Dataset Description
-
-The dataset contains questionnaire answers and mental health scores.
-
-### Dataset Size
-
-- Samples: **39,775**
-- Features: **42 questions**
-- Targets: **3 scores**
-
-Targets:
-
-- Depression Score
-- Anxiety Score
-- Stress Score
-
-Example Features:
+📈 Future Improvements  
+→ Improve multilingual performance  
+→ Expand dataset for better generalization  
+→ Add personalization & recommendation system  
+→ Enhance real-time prediction capabilities
