@@ -18,13 +18,6 @@ import numpy as np
 import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-@st.cache_resource
-def load_model():
-    tokenizer = AutoTokenizer.from_pretrained("tasneem33355/mental-xlmr")
-    model = AutoModelForSequenceClassification.from_pretrained("tasneem33355/mental-xlmr")
-    return tokenizer, model
-
-tokenizer, model = load_model()
 from deep_translator import GoogleTranslator
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
@@ -130,7 +123,7 @@ CAUSE_AR = {
 def load_xlmr():
     import pickle, os
     token = st.secrets["HF_TOKEN"]
-    tokenizer = AutoTokenizer.from_pretrained(
+    xlmr_tokenizer = AutoTokenizer.from_pretrained(
         "tasneem33355/mental-xlmr", token=token
     )
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -140,7 +133,7 @@ def load_xlmr():
     with open(le_path, "rb") as f:
         le = pickle.load(f)
     model.eval()
-    return tokenizer, model, le
+    return xlmr_tokenizer, model, le
 
 @st.cache_resource
 def load_survey():
@@ -158,7 +151,7 @@ def load_survey():
 
     return scaler, predict
 
-tokenizer, xlmr_model, le = load_xlmr()
+xlmr_tokenizer, xlmr_model, le = load_xlmr()
 scaler, survey_predict = load_survey()
 
 # ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -177,7 +170,7 @@ def predict_text(text: str) -> dict:
     cleaned  = clean_text(text)
     text_en  = translate_to_en(cleaned)
     combined = (text_en + " [SEP] " + cleaned) if text_en else cleaned
-    inputs   = tokenizer(combined, return_tensors="pt",
+    inputs   = xlmr_tokenizer(combined, return_tensors="pt",
                          truncation=True, max_length=192, padding=True)
     with torch.no_grad():
         probs = torch.softmax(xlmr_model(**inputs).logits, dim=-1).squeeze().numpy()
