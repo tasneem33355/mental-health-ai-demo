@@ -121,7 +121,6 @@ CAUSE_AR = {
 # ── LOAD MODELS ───────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_xlmr():
-    import pickle, os
     token = st.secrets["HF_TOKEN"]
     xlmr_tokenizer = AutoTokenizer.from_pretrained(
         "tasneem33355/mental-xlmr", token=token
@@ -129,11 +128,11 @@ def load_xlmr():
     model = AutoModelForSequenceClassification.from_pretrained(
         "tasneem33355/mental-xlmr", token=token
     )
-    le_path = os.path.join(os.path.dirname(__file__), "mental_xlmr_final", "label_encoder.pkl")
-    with open(le_path, "rb") as f:
-        le = pickle.load(f)
     model.eval()
-    return xlmr_tokenizer, model, le
+    # Hardcoded — LabelEncoder على ['anxiety','depression','stress'] دايماً بترتّب alphabetically
+    # 0=anxiety, 1=depression, 2=stress
+    classes = ["anxiety", "depression", "stress"]
+    return xlmr_tokenizer, model, classes
 
 @st.cache_resource
 def load_survey():
@@ -161,6 +160,25 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 def translate_to_en(text):
+    # Try Anthropic API first (reliable, no network restrictions)
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+        msg = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Translate the following text to English. "
+                    f"Return ONLY the translation, nothing else:\n{text}"
+                )
+            }]
+        )
+        return msg.content[0].text.strip()
+    except Exception:
+        pass
+    # Fallback: GoogleTranslator
     try:
         return GoogleTranslator(source="auto", target="en").translate(text)
     except Exception:
@@ -174,7 +192,7 @@ def predict_text(text: str) -> dict:
                          truncation=True, max_length=192, padding=True)
     with torch.no_grad():
         probs = torch.softmax(xlmr_model(**inputs).logits, dim=-1).squeeze().numpy()
-    return {c: round(float(p), 4) for c, p in zip(le.classes_, probs)}
+    return {c: round(float(p), 4) for c, p in zip(le, probs)}
 
 def predict_survey(answers: list) -> dict:
     data = scaler.transform(np.array(answers).reshape(1, -1))
